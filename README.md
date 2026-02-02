@@ -18,3 +18,9 @@ Struttura del repository
 
 Esecuzione
 Per avviare l’applicazione è sufficiente eseguire il file main.py presente nella cartella src.
+
+## 🎥 Video dimostrativo
+
+Il video dimostrativo del funzionamento dell’applicazione è disponibile al seguente link:
+
+https://drive.google.com/file/d/1BT6YwGV96zLZpS5pAGeNVU-rNUoWFzX3/view?usp=sharing
