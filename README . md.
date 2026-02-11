@@ -1,0 +1,85 @@
+# Sistema di Gestione Spese Personali e Budget
+
+## 📌 Descrizione del progetto
+Questo progetto realizza un **sistema di gestione delle spese personali**, permettendo di:
+- organizzare le spese per **categoria**
+- registrare **importi, date e descrizioni**
+- definire un **budget mensile per ogni categoria**
+- garantire la **coerenza dei dati** tramite vincoli di database
+
+Il progetto utilizza **Python** per la logica applicativa e **MySQL** per la gestione dei dati.
+
+---
+
+## 🗂️ Struttura del progetto
+Progetto_SistemaGestione_Spese/
+│
+├── main.py        # Punto di ingresso dell'applicazione
+├── db.py          # Funzioni di accesso al database
+├── config.py      # Configurazione di connessione MySQL
+├── database.sql   # Script SQL per creazione database e tabelle
+├── README.md      # Documentazione del progetto
+└── .venv/         # Ambiente virtuale Python
+
+---
+
+## 🧱 Struttura del Database
+
+Il database `GestioneSpese` è composto da tre tabelle principali:
+
+### **CATEGORIE**
+- `id` (PK)
+- `nome` (UNIQUE)
+
+### **SPESE**
+- `id` (PK)
+- `data`
+- `importo`
+- `descrizione`
+- `categoria_id` (FK → CATEGORIE.id)
+
+### **BUDGET**
+- `id` (PK)
+- `mese`
+- `importo`
+- `categoria_id` (FK → CATEGORIE.id)
+- vincolo `UNIQUE (mese, categoria_id)`
+
+---
+
+## ⚙️ Requisiti
+- Python 3.x
+- MySQL
+- Libreria `mysql-connector-python`
+
+---
+
+## ▶️ Avvio del progetto
+
+1. Creare il database eseguendo lo script `database.sql`
+2. Configurare le credenziali MySQL in `config.py`
+3. Avviare l’applicazione con:
+
+```bash
+python main.py
+```
+---
+
+## 📊 Report disponibili
+
+L’applicazione include un sistema di report accessibile dal **Menu 4**, che consente di analizzare le spese registrate.
+
+### 1️⃣ Totale spese per categoria
+Mostra il totale delle spese raggruppate per categoria.
+
+### 2️⃣ Spese mensili vs budget
+Permette di confrontare, per una categoria e un mese specifico (YYYY-MM):
+- budget definito
+- totale speso
+- stato finale (OK / SUPERAMENTO BUDGET)
+
+### 3️⃣ Elenco completo delle spese
+Visualizza tutte le spese registrate:
+- ordinate per data
+- con categoria e importo
+- con descrizione (se presente)
