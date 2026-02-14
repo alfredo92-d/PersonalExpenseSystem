@@ -1,97 +1,132 @@
-/* ============================================================
-   PROGETTO: Sistema Gestione Spese Personali e Budget
-   DB: GestioneSpese
-   TABELLE: categorie, spese, budget
-   ============================================================ */
+﻿# ************************************************************
+# Sequel Ace SQL dump
+# Versione 20096
+#
+# https://sequel-ace.com/
+# https://github.com/Sequel-Ace/Sequel-Ace
+#
+# Host: localhost (MySQL 9.5.0)
+# Database: GestioneSpese
+# Tempo Di Generazione: 2026-02-06 16:30:40 +0000
+# ************************************************************
 
--- 1) Creazione database
-DROP DATABASE IF EXISTS GestioneSpese;
-CREATE DATABASE GestioneSpese
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
 
-USE GestioneSpese;
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+SET NAMES utf8mb4;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE='NO_AUTO_VALUE_ON_ZERO', SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
--- 2) Eliminazione tabelle (ordine corretto per le FK)
-DROP TABLE IF EXISTS spese;
-DROP TABLE IF EXISTS budget;
-DROP TABLE IF EXISTS categorie;
 
--- 3) Tabella CATEGORIE
-CREATE TABLE categorie (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  nome VARCHAR(50) NOT NULL,
-  CONSTRAINT uq_categoria_nome UNIQUE (nome)
-);
+# Dump della tabella budget
+# ------------------------------------------------------------
 
--- 4) Tabella SPESE
-CREATE TABLE spese (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  data DATE NOT NULL,
-  importo DECIMAL(10,2) NOT NULL,
-  categoria_id INT UNSIGNED NOT NULL,
-  descrizione VARCHAR(255) NULL,
+DROP TABLE IF EXISTS `budget`;
 
-  CONSTRAINT chk_importo_spesa CHECK (importo > 0),
+CREATE TABLE `budget` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `mese` char(7) NOT NULL,
+  `categoria_id` int unsigned NOT NULL,
+  `importo` decimal(10,2) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_budget` (`mese`,`categoria_id`),
+  KEY `fk_budget_categoria` (`categoria_id`),
+  CONSTRAINT `fk_budget_categoria` FOREIGN KEY (`categoria_id`) REFERENCES `categorie` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `chk_budget_importo` CHECK ((`importo` > 0))
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-  CONSTRAINT fk_spese_categoria
-    FOREIGN KEY (categoria_id)
-    REFERENCES categorie(id)
-    ON UPDATE CASCADE
-    ON DELETE RESTRICT
-);
+LOCK TABLES `budget` WRITE;
+/*!40000 ALTER TABLE `budget` DISABLE KEYS */;
 
--- 5) Tabella BUDGET
-CREATE TABLE budget (
-  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  mese CHAR(7) NOT NULL,          -- formato YYYY-MM
-  categoria_id INT UNSIGNED NOT NULL,
-  importo DECIMAL(10,2) NOT NULL,
+INSERT INTO `budget` (`id`, `mese`, `categoria_id`, `importo`)
+VALUES
+	(1,'2026-02',1,50.00),
+	(4,'2026-02',11,60.00),
+	(5,'2026-02',15,150.00),
+	(6,'2026-02',16,150.00),
+	(7,'2026-02',17,100.00),
+	(8,'2026-02',22,150.00);
 
-  CONSTRAINT chk_importo_budget CHECK (importo > 0),
+/*!40000 ALTER TABLE `budget` ENABLE KEYS */;
+UNLOCK TABLES;
 
-  -- un solo budget per mese + categoria
-  CONSTRAINT uq_budget_mese_categoria UNIQUE (mese, categoria_id),
 
-  CONSTRAINT fk_budget_categoria
-    FOREIGN KEY (categoria_id)
-    REFERENCES categorie(id)
-    ON UPDATE CASCADE
-    ON DELETE RESTRICT
-);
+# Dump della tabella categorie
+# ------------------------------------------------------------
 
--- ============================================================
--- DATI DI ESEMPIO (dimostrano che il sistema funziona)
--- ============================================================
+DROP TABLE IF EXISTS `categorie`;
 
-INSERT INTO categorie (nome) VALUES
-('Alimentari'),
-('Trasporti');
+CREATE TABLE `categorie` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `nome` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `uq_categoria_nome` (`nome`)
+) ENGINE=InnoDB AUTO_INCREMENT=23 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
--- Spese di esempio (Alimentari = id 1, Trasporti = id 2)
-INSERT INTO spese (data, importo, categoria_id, descrizione) VALUES
-('2026-02-01', 10.00, 1, 'pane'),
-('2026-02-02', 2.50, 2, 'bus');
+LOCK TABLES `categorie` WRITE;
+/*!40000 ALTER TABLE `categorie` DISABLE KEYS */;
 
--- Budget di esempio
-INSERT INTO budget (mese, categoria_id, importo) VALUES
-('2026-02', 1, 300.00),
-('2026-02', 2, 60.00);
+INSERT INTO `categorie` (`id`, `nome`)
+VALUES
+	(15,'abbigliamento'),
+	(1,'Alimentari'),
+	(17,'cartoleria'),
+	(14,'Istruzione'),
+	(22,'musica'),
+	(18,'passatempo'),
+	(13,'Salute'),
+	(16,'shopping'),
+	(11,'Svago'),
+	(2,'Trasporti');
 
--- ============================================================
--- ESEMPI DI VINCOLI (NON eseguire: servono solo come prova)
--- ============================================================
+/*!40000 ALTER TABLE `categorie` ENABLE KEYS */;
+UNLOCK TABLES;
 
--- 1) CHECK importo spesa > 0 (fallisce)
--- INSERT INTO spese (data, importo, categoria_id, descrizione)
--- VALUES ('2026-02-03', -5.00, 1, 'errore');
 
--- 2) FOREIGN KEY: categoria_id deve esistere (fallisce se 999 non esiste)
--- INSERT INTO spese (data, importo, categoria_id, descrizione)
--- VALUES ('2026-02-03', 5.00, 999, 'errore');
+# Dump della tabella spese
+# ------------------------------------------------------------
 
--- 3) UNIQUE su categorie.nome (fallisce se duplicato)
--- INSERT INTO categorie (nome) VALUES ('Alimentari');
+DROP TABLE IF EXISTS `spese`;
 
--- 4) UNIQUE su budget (mese, categoria_id) (fallisce se duplicato)
--- INSERT INTO budget (mese, categoria_id, importo) VALUES ('2026-02', 1, 999.00);
+CREATE TABLE `spese` (
+  `id` int unsigned NOT NULL AUTO_INCREMENT,
+  `data` date NOT NULL,
+  `importo` decimal(10,2) NOT NULL,
+  `categoria_id` int unsigned NOT NULL,
+  `descrizione` varchar(255) DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `fk_spese_categoria` (`categoria_id`),
+  CONSTRAINT `fk_spese_categoria` FOREIGN KEY (`categoria_id`) REFERENCES `categorie` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT `chk_importo` CHECK ((`importo` > 0))
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+LOCK TABLES `spese` WRITE;
+/*!40000 ALTER TABLE `spese` DISABLE KEYS */;
+
+INSERT INTO `spese` (`id`, `data`, `importo`, `categoria_id`, `descrizione`)
+VALUES
+	(1,'2026-02-01',10.00,1,'pane'),
+	(2,'2026-02-01',5.00,1,NULL),
+	(3,'2026-02-01',30.00,1,NULL),
+	(4,'2026-02-01',45.00,11,'cinema'),
+	(5,'2026-02-01',40.00,14,'Libro universitario'),
+	(6,'2026-02-02',60.00,15,'acquisto maglietta'),
+	(7,'2026-02-02',60.00,16,'acquisto maglietta'),
+	(8,'2026-02-02',49.99,17,'acquisto diario'),
+	(9,'2026-02-02',60.00,18,'nuoto'),
+	(10,'2026-02-02',99.00,18,'nuoto'),
+	(11,'2026-02-06',50.00,22,'microfono');
+
+/*!40000 ALTER TABLE `spese` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
